@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Finance Tracker</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1a6b3c">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --green: #1a6b3c;
+      --green-light: #27ae60;
+      --green-dark: #0d3d22;
+      --gold: #c9a84c;
+      --white: #ffffff;
+      --light-bg: #f0f7f3;
+      --border: #d4e6db;
+      --gray: #666666;
+      --dark: #1a1a1a;
+      --red: #e74c3c;
+      --blue: #3498db;
+      --orange: #f39c12;
+    }
+
+    .dark-mode {
+      --white: #1a2e22;
+      --light-bg: #0d1f15;
+      --border: #2d5a3d;
+      --gray: #aaaaaa;
+      --dark: #ffffff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--light-bg);
+      color: var(--dark);
+      min-height: 100vh;
+      padding-bottom: 100px;
+    }
+
+    .install-banner {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--green);
+      color: white;
+      padding: 14px 24px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 999;
+      box-shadow: 0 8px 24px rgba(26,107,60,0.4);
+      animation: bounce 1.5s infinite;
+      white-space: nowrap;
+      border: none;
+    }
+
+    .ios-banner {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--white);
+      color: var(--dark);
+      padding: 14px 20px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 999;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      text-align: center;
+      width: 90%;
+      max-width: 340px;
+      border: 1px solid var(--border);
+    }
+
+    .ios-banner strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: var(--green);
+    }
+
+    .ios-close {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      background: transparent;
+      border: none;
+      color: var(--gray);
+      font-size: 16px;
+      cursor: pointer;
+      padding: 0;
+      animation: none;
+      box-shadow: none;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-6px); }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--green-dark), var(--green));
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    .header-left h1 {
+      font-size: 20px;
+      font-weight: 800;
+      color: white;
+    }
+
+    .header-left h1 span { color: var(--gold); }
+    .header-left p { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+
+    .theme-toggle {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      border-radius: 50px;
+      padding: 8px 14px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    .balance-card {
+      background: linear-gradient(135deg, var(--green), var(--green-light));
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 24px rgba(26,107,60,0.3);
+    }
+
+    .balance-label {
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .balance-amount {
+      font-size: 42px;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 4px;
+    }
+
+    .balance-amount.negative { color: #ffcccc; }
+    .balance-sub { font-size: 12px; color: rgba(255,255,255,0.6); }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .stat-icon.income { background: rgba(39,174,96,0.15); }
+    .stat-icon.expense { background: rgba(231,76,60,0.15); }
+
+    .stat-info .label {
+      font-size: 11px;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-info .amount {
+      font-size: 18px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .stat-info .amount.income { color: var(--green-light); }
+    .stat-info .amount.expense { color: var(--red); }
+
+    .card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group { margin-bottom: 12px; }
+
+    .form-group label {
+      font-size: 12px;
+      color: var(--gray);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      background: var(--light-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      color: var(--dark);
+      font-size: 14px;
+      outline: none;
+    }
+
+    .type-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .type-btn {
+      padding: 10px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      background: transparent;
+      color: var(--gray);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .type-btn.active-income {
+      border-color: var(--green-light);
+      color: var(--green-light);
+      background: rgba(39,174,96,0.1);
+    }
+
+    .type-btn.active-expense {
+      border-color: var(--red);
+      color: var(--red);
+      background: rgba(231,76,60,0.1);
+    }
+
+    .recurring-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding: 10px;
+      background: var(--light-bg);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .recurring-row label {
+      font-size: 13px;
+      color: var(--dark);
+      margin: 0;
+      text-transform: none;
+      letter-spacing: 0;
+      font-weight: 500;
+    }
+
+    .recurring-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .add-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--green), var(--green-light));
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      margin-top: 4px;
+    }
+
+    .add-btn:hover { opacity: 0.9; }
+
+    /* Budget Section */
+    .budget-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .budget-item {
+      background: var(--light-bg);
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .budget-item .budget-label {
+      font-size: 11px;
+      color: var(--gray);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .budget-item .budget-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--border);
+      border-radius: 50px;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+
+    .budget-item .budget-fill {
+      height: 100%;
+      border-radius: 50px;
+      transition: width 0.5s ease;
+    }
+
+    .budget-item .budget-amounts {
+      font-size: 11px;
+      color: var(--gray);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Monthly Summary */
+    .monthly-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .monthly-item {
+      background: var(--light-bg);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .monthly-item .m-label {
+      font-size: 11px;
+      color: var(--gray);
+      margin-bottom: 6px;
+    }
+
+    .monthly-item .m-value {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .tips-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .tip-item {
+      background: var(--light-bg);
+      border-radius: 10px;
+      padding: 12px;
+      border-left: 3px solid var(--green);
+      font-size: 13px;
+      color: var(--dark);
+      line-height: 1.5;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 220px;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      background: transparent;
+      color: var(--gray);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn.active {
+      background: var(--green);
+      color: white;
+      border-color: var(--green);
+    }
+
+    .transaction-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    .transaction-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--light-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      animation: slideIn 0.3s ease;
+    }
+
+    .transaction-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .transaction-details { flex: 1; }
+
+    .transaction-desc {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .transaction-meta {
+      font-size: 11px;
+      color: var(--gray);
+      margin-top: 2px;
+    }
+
+    .transaction-amount {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .transaction-amount.income { color: var(--green-light); }
+    .transaction-amount.expense { color: var(--red); }
+
+    .delete-btn {
+      background: transparent;
+      border: none;
+      color: var(--gray);
+      font-size: 16px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .delete-btn:hover { color: var(--red); }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px;
+      color: var(--gray);
+    }
+
+    .empty-state .icon { font-size: 40px; margin-bottom: 8px; }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .action-btn {
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--gray);
+      transition: all 0.2s;
+    }
+
+    .action-btn:hover { border-color: var(--green); color: var(--green); }
+    .action-btn.danger:hover { border-color: var(--red); color: var(--red); }
+
+    .copyright {
+      text-align: center;
+      color: var(--gray);
+      font-size: 12px;
+      margin-top: 24px;
+    }
+
+    .warning-badge {
+      background: rgba(243,156,18,0.15);
+      color: var(--orange);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 50px;
+      border: 1px solid var(--orange);
+      margin-left: 6px;
+    }
+
+    .popup-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .popup-overlay.show { display: flex; }
+
+    .popup-box {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 32px 24px;
+      text-align: center;
+      max-width: 300px;
+      width: 90%;
+      animation: popIn 0.4s ease;
+    }
+
+    .popup-box .emoji { font-size: 56px; margin-bottom: 16px; }
+    .popup-box h2 { font-size: 20px; color: var(--dark); margin-bottom: 8px; }
+    .popup-box p { color: var(--gray); font-size: 13px; margin-bottom: 20px; line-height: 1.6; }
+
+    .popup-close {
+      background: linear-gradient(135deg, var(--green), var(--green-light));
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 32px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="install-banner" id="installBtn" onclick="installApp()">
+    📲 Install My Finance Tracker
+  </button>
+
+  <div class="ios-banner" id="iosBanner">
+    <button class="ios-close" onclick="closeIosBanner()">✕</button>
+    <strong>📲 Install on iPhone/iPad</strong>
+    Tap the Share button (⬆️) in Safari then tap "Add to Home Screen" to install this app
+  </div>
+
+  <header>
+    <div class="header-left">
+      <h1>My Finance <span>Tracker</span></h1>
+      <p>TeaJay Konsult Ltd.</p>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+  </header>
+
+  <div class="container">
+
+    <div class="balance-card">
+      <div class="balance-label">Current Balance</div>
+      <div class="balance-amount" id="balanceDisplay">₦0.00</div>
+      <div class="balance-sub">Updated in real time</div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon income">💰</div>
+        <div class="stat-info">
+          <div class="label">Total Income</div>
+          <div class="amount income" id="totalIncome">₦0.00</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon expense">💸</div>
+        <div class="stat-info">
+          <div class="label">Total Expenses</div>
+          <div class="amount expense" id="totalExpense">₦0.00</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Transaction -->
+    <div class="card">
+      <div class="card-title">➕ Add Transaction</div>
+      <div class="type-toggle">
+        <button class="type-btn active-income" id="btn-income" onclick="setType('income')">💰 Income</button>
+        <button class="type-btn" id="btn-expense" onclick="setType('expense')">💸 Expense</button>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <input type="text" id="descInput" placeholder="e.g. Salary, Groceries..." />
+      </div>
+      <div class="form-group">
+        <label>Amount (₦)</label>
+        <input type="number" id="amountInput" placeholder="0.00" />
+      </div>
+      <div class="form-group" id="categoryGroup">
+        <label>Category</label>
+        <select id="categoryInput">
+          <option value="Food">🍔 Food</option>
+          <option value="Transport">🚗 Transport</option>
+          <option value="Bills">💡 Bills</option>
+          <option value="Entertainment">🎉 Entertainment</option>
+          <option value="Shopping">🛍️ Shopping</option>
+          <option value="Health">🏥 Health</option>
+          <option value="Education">📚 Education</option>
+          <option value="Miscellaneous">📦 Miscellaneous</option>
+        </select>
+      </div>
+      <div class="recurring-row">
+        <input type="checkbox" id="recurringCheck" />
+        <label for="recurringCheck">🔄 Mark as recurring transaction</label>
+      </div>
+      <button class="add-btn" onclick="addTransaction()">Add Transaction</button>
+    </div>
+
+    <!-- Budget Limits -->
+    <div class="card">
+      <div class="card-title">🎯 Budget Limits</div>
+      <div class="budget-grid" id="budgetGrid"></div>
+    </div>
+
+    <!-- Monthly Summary -->
+    <div class="card">
+      <div class="card-title">📅 Monthly Summary</div>
+      <div class="monthly-grid">
+        <div class="monthly-item">
+          <div class="m-label">This Month Income</div>
+          <div class="m-value" id="monthIncome" style="color:var(--green-light)">₦0</div>
+        </div>
+        <div class="monthly-item">
+          <div class="m-label">This Month Expenses</div>
+          <div class="m-value" id="monthExpense" style="color:var(--red)">₦0</div>
+        </div>
+        <div class="monthly-item">
+          <div class="m-label">Monthly Balance</div>
+          <div class="m-value" id="monthBalance">₦0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="card">
+      <div class="card-title">📊 Spending Breakdown</div>
+      <div class="chart-container">
+        <canvas id="spendingChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Financial Tips -->
+    <div class="card">
+      <div class="card-title">💡 Financial Tips</div>
+      <div class="tips-list" id="tipsList"></div>
+    </div>
+
+    <!-- Transactions -->
+    <div class="card">
+      <div class="card-title">📋 Transaction History</div>
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="filterTransactions('all', this)">All</button>
+        <button class="filter-btn" onclick="filterTransactions('income', this)">Income</button>
+        <button class="filter-btn" onclick="filterTransactions('expense', this)">Expenses</button>
+        <button class="filter-btn" onclick="filterTransactions('recurring', this)">🔄 Recurring</button>
+      </div>
+      <div class="transaction-list" id="transactionList"></div>
+      <div class="action-row">
+        <button class="action-btn" onclick="exportToWhatsApp()">📤 Share via WhatsApp</button>
+        <button class="action-btn danger" onclick="clearAll()">🗑️ Clear All</button>
+      </div>
+    </div>
+
+    <div class="copyright">© 2026 TeaJay Konsult Ltd. All rights reserved.</div>
+  </div>
+
+  <!-- Popup -->
+  <div class="popup-overlay" id="financePopup">
+    <div class="popup-box">
+      <div class="emoji" id="popupEmoji">🏆</div>
+      <h2 id="popupTitle">Well Done!</h2>
+      <p id="popupMessage">You are doing great!</p>
+      <button class="popup-close" onclick="closePopup()">Thank You! 💪</button>
+    </div>
+  </div>
+
+<script>
+  let transactions = JSON.parse(localStorage.getItem('teajay-finance-v2')) || [];
+  let selectedType = 'income';
+  let isDark = false;
+  let chart = null;
+  let currentFilter = 'all';
+  let deferredPrompt = null;
+
+  const budgetLimits = {
+    Food: 30000, Transport: 20000, Bills: 50000,
+    Entertainment: 15000, Shopping: 25000, Health: 20000,
+    Education: 30000, Miscellaneous: 10000
+  };
+
+  const categoryIcons = {
+    Food: '🍔', Transport: '🚗', Bills: '💡',
+    Entertainment: '🎉', Shopping: '🛍️', Health: '🏥',
+    Education: '📚', Miscellaneous: '📦', Income: '💰'
+  };
+
+  const categoryColors = {
+    Food: '#e74c3c', Transport: '#3498db', Bills: '#9b59b6',
+    Entertainment: '#f39c12', Shopping: '#e91e63', Health: '#1abc9c',
+    Education: '#2ecc71', Miscellaneous: '#95a5a6'
+  };
+
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
+
+  if (isIOS && !isInStandaloneMode) {
+    document.getElementById('iosBanner').style.display = 'block';
+  }
+
+  function closeIosBanner() {
+    document.getElementById('iosBanner').style.display = 'none';
+  }
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('installBtn').style.display = 'block';
+  });
+
+  window.addEventListener('appinstalled', () => {
+    document.getElementById('installBtn').style.display = 'none';
+    deferredPrompt = null;
+  });
+
+  async function installApp() {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const result = await deferredPrompt.userChoice;
+    if (result.outcome === 'accepted') document.getElementById('installBtn').style.display = 'none';
+    deferredPrompt = null;
+  }
+
+  function toggleTheme() {
+    isDark = !isDark;
+    document.body.classList.toggle('dark-mode', isDark);
+    document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+  }
+
+  function setType(type) {
+    selectedType = type;
+    document.getElementById('btn-income').className = 'type-btn';
+    document.getElementById('btn-expense').className = 'type-btn';
+    document.getElementById('btn-' + type).className = 'type-btn active-' + type;
+    document.getElementById('categoryGroup').style.display = type === 'expense' ? 'block' : 'none';
+  }
+
+  function formatAmount(amount) {
+    return '₦' + Number(amount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function getCurrentMonth() {
+    const now = new Date();
+    return `${now.getMonth()}-${now.getFullYear()}`;
+  }
+
+  function addTransaction() {
+    const desc = document.getElementById('descInput').value.trim();
+    const amount = parseFloat(document.getElementById('amountInput').value);
+    const category = selectedType === 'income' ? 'Income' : document.getElementById('categoryInput').value;
+    const recurring = document.getElementById('recurringCheck').checked;
+    if (!desc || isNaN(amount) || amount <= 0) return;
+
+    const transaction = {
+      id: Date.now(),
+      desc, amount,
+      type: selectedType,
+      category, recurring,
+      month: getCurrentMonth(),
+      date: new Date().toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })
+    };
+
+    transactions.unshift(transaction);
+    saveAndRender();
+    document.getElementById('descInput').value = '';
+    document.getElementById('amountInput').value = '';
+    document.getElementById('recurringCheck').checked = false;
+    checkFinancialHealth();
+    checkBudgetWarning(category, amount);
+  }
+
+  function checkBudgetWarning(category, amount) {
+    if (selectedType !== 'expense') return;
+    const spent = transactions.filter(t => t.type === 'expense' && t.category === category && t.month === getCurrentMonth()).reduce((s, t) => s + t.amount, 0);
+    const limit = budgetLimits[category];
+    if (spent >= limit * 0.9) {
+      showPopup('⚠️', 'Budget Alert!', `You've used ${Math.round((spent/limit)*100)}% of your ${category} budget this month. Spend carefully!`);
+    }
+  }
+
+  function deleteTransaction(id) {
+    transactions = transactions.filter(t => t.id !== id);
+    saveAndRender();
+  }
+
+  function clearAll() {
+    if (transactions.length === 0) return;
+    transactions = [];
+    saveAndRender();
+  }
+
+  function saveAndRender() {
+    localStorage.setItem('teajay-finance-v2', JSON.stringify(transactions));
+    updateStats();
+    updateMonthlySummary();
+    updateBudgetGrid();
+    updateTips();
+    renderTransactions(currentFilter);
+    updateChart();
+  }
+
+  function updateStats() {
+    const income = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+    const expense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+    const balance = income - expense;
+    document.getElementById('totalIncome').textContent = formatAmount(income);
+    document.getElementById('totalExpense').textContent = formatAmount(expense);
+    const balanceEl = document.getElementById('balanceDisplay');
+    balanceEl.textContent = formatAmount(balance);
+    balanceEl.className = 'balance-amount' + (balance < 0 ? ' negative' : '');
+  }
+
+  function updateMonthlySummary() {
+    const thisMonth = getCurrentMonth();
+    const mIncome = transactions.filter(t => t.type === 'income' && t.month === thisMonth).reduce((s, t) => s + t.amount, 0);
+    const mExpense = transactions.filter(t => t.type === 'expense' && t.month === thisMonth).reduce((s, t) => s + t.amount, 0);
+    const mBalance = mIncome - mExpense;
+    document.getElementById('monthIncome').textContent = formatAmount(mIncome);
+    document.getElementById('monthExpense').textContent = formatAmount(mExpense);
+    const mBalEl = document.getElementById('monthBalance');
+    mBalEl.textContent = formatAmount(mBalance);
+    mBalEl.style.color = mBalance >= 0 ? 'var(--green-light)' : 'var(--red)';
+  }
+
+  function updateBudgetGrid() {
+    const thisMonth = getCurrentMonth();
+    const grid = document.getElementById('budgetGrid');
+    grid.innerHTML = Object.keys(budgetLimits).map(cat => {
+      const spent = transactions.filter(t => t.type === 'expense' && t.category === cat && t.month === thisMonth).reduce((s, t) => s + t.amount, 0);
+      const limit = budgetLimits[cat];
+      const percent = Math.min((spent / limit) * 100, 100);
+      const color = percent >= 90 ? '#e74c3c' : percent >= 70 ? '#f39c12' : '#27ae60';
+      const warning = percent >= 90 ? '<span class="warning-badge">⚠️ Near limit</span>' : '';
+      return `
+        <div class="budget-item">
+          <div class="budget-label">
+            <span>${categoryIcons[cat]} ${cat}${warning}</span>
+            <span>${Math.round(percent)}%</span>
+          </div>
+          <div class="budget-bar">
+            <div class="budget-fill" style="width:${percent}%;background:${color}"></div>
+          </div>
+          <div class="budget-amounts">
+            <span>${formatAmount(spent)}</span>
+            <span>${formatAmount(limit)}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function updateTips() {
+    const income = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+    const expense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+    const ratio = income > 0 ? expense / income : 0;
+    const tips = [];
+
+    if (ratio > 0.8) tips.push('🚨 Your expenses are very high relative to your income. Try cutting non-essential spending immediately.');
+    if (ratio > 0.5) tips.push('⚠️ You are spending more than 50% of your income. Consider reviewing your budget limits.');
+    if (ratio <= 0.3 && income > 0) tips.push('🌟 Excellent! You are saving over 70% of your income. Consider investing your savings.');
+    
+    const foodSpend = transactions.filter(t => t.category === 'Food').reduce((s, t) => s + t.amount, 0);
+    if (foodSpend > budgetLimits.Food) tips.push('🍔 Your food spending is over budget. Try meal planning to reduce costs.');
+    
+    const entertainment = transactions.filter(t => t.category === 'Entertainment').reduce((s, t) => s + t.amount, 0);
+    if (entertainment > budgetLimits.Entertainment) tips.push('🎉 Entertainment spending is high. Look for free or low-cost alternatives.');
+
+    if (tips.length === 0) tips.push('💚 Your finances look healthy! Keep tracking to maintain this great balance.');
+    if (income === 0) tips.push('💡 Start by adding your income to get personalized financial tips.');
+
+    document.getElementById('tipsList').innerHTML = tips.map(t => `<div class="tip-item">${t}</div>`).join('');
+  }
+
+  function filterTransactions(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderTransactions(filter);
+  }
+
+  function renderTransactions(filter) {
+    const list = document.getElementById('transactionList');
+    let filtered = transactions;
+    if (filter === 'income') filtered = transactions.filter(t => t.type === 'income');
+    else if (filter === 'expense') filtered = transactions.filter(t => t.type === 'expense');
+    else if (filter === 'recurring') filtered = transactions.filter(t => t.recurring);
+
+    if (filtered.length === 0) {
+      list.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>No transactions found</p></div>`;
+      return;
+    }
+
+    list.innerHTML = filtered.map(t => `
+      <div class="transaction-item">
+        <div class="transaction-icon" style="background:${t.type === 'income' ? 'rgba(39,174,96,0.15)' : 'rgba(231,76,60,0.1)'}">
+          ${categoryIcons[t.category] || '💰'}
+        </div>
+        <div class="transaction-details">
+          <div class="transaction-desc">${t.desc} ${t.recurring ? '🔄' : ''}</div>
+          <div class="transaction-meta">${t.category} • ${t.date}</div>
+        </div>
+        <div class="transaction-amount ${t.type}">
+          ${t.type === 'income' ? '+' : '-'}${formatAmount(t.amount)}
+        </div>
+        <button class="delete-btn" onclick="deleteTransaction(${t.id})">🗑️</button>
+      </div>
+    `).join('');
+  }
+
+  function updateChart() {
+    const expenses = transactions.filter(t => t.type === 'expense');
+    const categoryTotals = {};
+    expenses.forEach(t => { categoryTotals[t.category] = (categoryTotals[t.category] || 0) + t.amount; });
+    const labels = Object.keys(categoryTotals);
+    const data = Object.values(categoryTotals);
+    const colors = labels.map(l => categoryColors[l] || '#95a5a6');
+    if (chart) chart.destroy();
+    if (labels.length === 0) return;
+    chart = new Chart(document.getElementById('spendingChart'), {
+      type: 'doughnut',
+      data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#ffffff' }] },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 12 } } }
+      }
+    });
+  }
+
+  function checkFinancialHealth() {
+    const income = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+    const expense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+    if (income === 0) return;
+    const ratio = expense / income;
+    if (ratio === 0) showPopup('💰', 'Pure Saver!', 'You have income but zero expenses recorded. You are a financial champion!');
+    else if (ratio <= 0.3) showPopup('🏆', 'Financially Excellent!', 'Your expenses are less than 30% of your income. Outstanding financial discipline!');
+    else if (ratio <= 0.5) showPopup('👏', 'Financially Prudent!', 'You are spending less than half your income. You are on a great financial path!');
+    else if (ratio <= 0.7) showPopup('👍', 'Doing Well!', 'Your spending is within a healthy range. Keep tracking your finances!');
+  }
+
+  function exportToWhatsApp() {
+    const income = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+    const expense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+    const balance = income - expense;
+    let text = `💰 *My Finance Summary*\n`;
+    text += `_Generated by TeaJay Konsult Finance Tracker_\n\n`;
+    text += `✅ Total Income: ₦${income.toLocaleString()}\n`;
+    text += `❌ Total Expenses: ₦${expense.toLocaleString()}\n`;
+    text += `💵 Balance: ₦${balance.toLocaleString()}\n\n`;
+    text += `📋 *Recent Transactions:*\n`;
+    transactions.slice(0, 10).forEach(t => {
+      text += `${t.type === 'income' ? '➕' : '➖'} ${t.desc} - ₦${t.amount.toLocaleString()} (${t.date})\n`;
+    });
+    text += `\n_Track your finances with My Finance Tracker by TeaJay Konsult_`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  }
+
+  function showPopup(emoji, title, message) {
+    document.getElementById('popupEmoji').textContent = emoji;
+    document.getElementById('popupTitle').textContent = title;
+    document.getElementById('popupMessage').textContent = message;
+    document.getElementById('financePopup').classList.add('show');
+  }
+
+  function closePopup() {
+    document.getElementById('financePopup').classList.remove('show');
+  }
+
+  setType('income');
+  saveAndRender();
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+
+</body>
+</html>
