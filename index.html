@@ -575,6 +575,29 @@
     .action-btn:hover { border-color: var(--green); color: var(--green); }
     .action-btn.danger:hover { border-color: var(--red); color: var(--red); }
 
+    .share-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .share-btn {
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      color: white;
+      transition: opacity 0.2s;
+    }
+
+    .share-btn:hover { opacity: 0.85; }
+    .share-btn.whatsapp { background: #25d366; }
+    .share-btn.facebook { background: #1877f2; }
+    .share-btn.twitter { background: #000000; }
+
     .copyright {
       text-align: center;
       color: var(--gray);
@@ -772,8 +795,12 @@
       </div>
       <div class="transaction-list" id="transactionList"></div>
       <div class="action-row">
-        <button class="action-btn" onclick="exportToWhatsApp()">📤 Share via WhatsApp</button>
         <button class="action-btn danger" onclick="clearAll()">🗑️ Clear All</button>
+      </div>
+      <div class="share-row">
+        <button class="share-btn whatsapp" onclick="shareWhatsApp()">💬 WhatsApp</button>
+        <button class="share-btn facebook" onclick="shareFacebook()">📘 Facebook</button>
+        <button class="share-btn twitter" onclick="shareTwitter()">🐦 X</button>
       </div>
     </div>
 
@@ -790,6 +817,8 @@
   </div>
 
 <script>
+  const APP_LINK = 'https://finance-expense-tracker-teajaykonsult.vercel.app';
+
   let transactions = JSON.parse(localStorage.getItem('teajay-finance-v2')) || [];
   let selectedType = 'income';
   let isDark = false;
@@ -1081,7 +1110,7 @@
     else if (ratio <= 0.7) showPopup('👍', 'Doing Well!', 'Your spending is within a healthy range. Keep tracking your finances!');
   }
 
-  function exportToWhatsApp() {
+  function getShareSummary() {
     const income = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
     const expense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
     const balance = income - expense;
@@ -1094,8 +1123,21 @@
     transactions.slice(0, 10).forEach(t => {
       text += `${t.type === 'income' ? '➕' : '➖'} ${t.desc} - ${formatAmount(t.amount)} (${t.date})\n`;
     });
-    text += `\n_Track your finances with My Finance Tracker by TeaJay Konsult_`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    text += `\n_Track your finances with My Finance Tracker by TeaJay Konsult_\n🌐 Get the app: ${APP_LINK}`;
+    return text;
+  }
+
+  function shareWhatsApp() {
+    window.open(`https://wa.me/?text=${encodeURIComponent(getShareSummary())}`, '_blank');
+  }
+
+  function shareFacebook() {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(APP_LINK)}`, '_blank');
+  }
+
+  function shareTwitter() {
+    const text = `I just tracked my finances with My Finance Tracker by TeaJay Konsult! 💰\n\nTry it here: ${APP_LINK}`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
   }
 
   function showPopup(emoji, title, message) {
