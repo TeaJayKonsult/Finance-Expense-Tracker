@@ -140,6 +140,12 @@
     .header-left h1 span { color: var(--gold); }
     .header-left p { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px; }
 
+    .header-right {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
     .theme-toggle {
       background: rgba(255,255,255,0.15);
       border: none;
@@ -148,6 +154,23 @@
       color: white;
       font-size: 16px;
       cursor: pointer;
+    }
+
+    .currency-select {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      border-radius: 50px;
+      padding: 8px 14px;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .currency-select option {
+      background: var(--green-dark);
+      color: white;
     }
 
     .container {
@@ -346,7 +369,6 @@
 
     .add-btn:hover { opacity: 0.9; }
 
-    /* Budget Section */
     .budget-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -390,7 +412,6 @@
       justify-content: space-between;
     }
 
-    /* Monthly Summary */
     .monthly-grid {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
@@ -626,14 +647,32 @@
       <h1>My Finance <span>Tracker</span></h1>
       <p>TeaJay Konsult Ltd.</p>
     </div>
-    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <div class="header-right">
+      <select class="currency-select" id="currencySelect" onchange="changeCurrency()">
+        <option value="₦">🇳🇬 ₦ Naira</option>
+        <option value="$">🇺🇸 $ Dollar</option>
+        <option value="£">🇬🇧 £ Pound</option>
+        <option value="€">🇪🇺 € Euro</option>
+        <option value="₵">🇬🇭 ₵ Cedi</option>
+        <option value="KSh">🇰🇪 KSh Shilling</option>
+        <option value="R">🇿🇦 R Rand</option>
+        <option value="Fr">🇨🇭 Fr Swiss Franc</option>
+        <option value="₽">🇷🇺 ₽ Ruble</option>
+        <option value="¥">🇨🇳 ¥ Yuan</option>
+        <option value="¥">🇯🇵 ¥ Yen</option>
+        <option value="₩">🇰🇷 ₩ Won</option>
+        <option value="A$">🇦🇺 A$ Dollar</option>
+        <option value="€">🇫🇷 € Euro</option>
+      </select>
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+    </div>
   </header>
 
   <div class="container">
 
     <div class="balance-card">
       <div class="balance-label">Current Balance</div>
-      <div class="balance-amount" id="balanceDisplay">₦0.00</div>
+      <div class="balance-amount" id="balanceDisplay">0.00</div>
       <div class="balance-sub">Updated in real time</div>
     </div>
 
@@ -642,19 +681,18 @@
         <div class="stat-icon income">💰</div>
         <div class="stat-info">
           <div class="label">Total Income</div>
-          <div class="amount income" id="totalIncome">₦0.00</div>
+          <div class="amount income" id="totalIncome">0.00</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon expense">💸</div>
         <div class="stat-info">
           <div class="label">Total Expenses</div>
-          <div class="amount expense" id="totalExpense">₦0.00</div>
+          <div class="amount expense" id="totalExpense">0.00</div>
         </div>
       </div>
     </div>
 
-    <!-- Add Transaction -->
     <div class="card">
       <div class="card-title">➕ Add Transaction</div>
       <div class="type-toggle">
@@ -666,7 +704,7 @@
         <input type="text" id="descInput" placeholder="e.g. Salary, Groceries..." />
       </div>
       <div class="form-group">
-        <label>Amount (₦)</label>
+        <label>Amount (<span id="currencyLabel">₦</span>)</label>
         <input type="number" id="amountInput" placeholder="0.00" />
       </div>
       <div class="form-group" id="categoryGroup">
@@ -689,32 +727,29 @@
       <button class="add-btn" onclick="addTransaction()">Add Transaction</button>
     </div>
 
-    <!-- Budget Limits -->
     <div class="card">
       <div class="card-title">🎯 Budget Limits</div>
       <div class="budget-grid" id="budgetGrid"></div>
     </div>
 
-    <!-- Monthly Summary -->
     <div class="card">
       <div class="card-title">📅 Monthly Summary</div>
       <div class="monthly-grid">
         <div class="monthly-item">
           <div class="m-label">This Month Income</div>
-          <div class="m-value" id="monthIncome" style="color:var(--green-light)">₦0</div>
+          <div class="m-value" id="monthIncome" style="color:var(--green-light)">0</div>
         </div>
         <div class="monthly-item">
           <div class="m-label">This Month Expenses</div>
-          <div class="m-value" id="monthExpense" style="color:var(--red)">₦0</div>
+          <div class="m-value" id="monthExpense" style="color:var(--red)">0</div>
         </div>
         <div class="monthly-item">
           <div class="m-label">Monthly Balance</div>
-          <div class="m-value" id="monthBalance">₦0</div>
+          <div class="m-value" id="monthBalance">0</div>
         </div>
       </div>
     </div>
 
-    <!-- Chart -->
     <div class="card">
       <div class="card-title">📊 Spending Breakdown</div>
       <div class="chart-container">
@@ -722,13 +757,11 @@
       </div>
     </div>
 
-    <!-- Financial Tips -->
     <div class="card">
       <div class="card-title">💡 Financial Tips</div>
       <div class="tips-list" id="tipsList"></div>
     </div>
 
-    <!-- Transactions -->
     <div class="card">
       <div class="card-title">📋 Transaction History</div>
       <div class="filter-row">
@@ -747,7 +780,6 @@
     <div class="copyright">© 2026 TeaJay Konsult Ltd. All rights reserved.</div>
   </div>
 
-  <!-- Popup -->
   <div class="popup-overlay" id="financePopup">
     <div class="popup-box">
       <div class="emoji" id="popupEmoji">🏆</div>
@@ -764,6 +796,7 @@
   let chart = null;
   let currentFilter = 'all';
   let deferredPrompt = null;
+  let currentCurrency = localStorage.getItem('teajay-currency') || '₦';
 
   const budgetLimits = {
     Food: 30000, Transport: 20000, Bills: 50000,
@@ -813,6 +846,24 @@
     deferredPrompt = null;
   }
 
+  function changeCurrency() {
+    currentCurrency = document.getElementById('currencySelect').value;
+    localStorage.setItem('teajay-currency', currentCurrency);
+    document.getElementById('currencyLabel').textContent = currentCurrency;
+    saveAndRender();
+  }
+
+  function initCurrency() {
+    const select = document.getElementById('currencySelect');
+    for (let i = 0; i < select.options.length; i++) {
+      if (select.options[i].value === currentCurrency) {
+        select.selectedIndex = i;
+        break;
+      }
+    }
+    document.getElementById('currencyLabel').textContent = currentCurrency;
+  }
+
   function toggleTheme() {
     isDark = !isDark;
     document.body.classList.toggle('dark-mode', isDark);
@@ -828,7 +879,7 @@
   }
 
   function formatAmount(amount) {
-    return '₦' + Number(amount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return currentCurrency + Number(amount).toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   function getCurrentMonth() {
@@ -849,7 +900,7 @@
       type: selectedType,
       category, recurring,
       month: getCurrentMonth(),
-      date: new Date().toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })
+      date: new Date().toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' })
     };
 
     transactions.unshift(transaction);
@@ -950,10 +1001,10 @@
     if (ratio > 0.8) tips.push('🚨 Your expenses are very high relative to your income. Try cutting non-essential spending immediately.');
     if (ratio > 0.5) tips.push('⚠️ You are spending more than 50% of your income. Consider reviewing your budget limits.');
     if (ratio <= 0.3 && income > 0) tips.push('🌟 Excellent! You are saving over 70% of your income. Consider investing your savings.');
-    
+
     const foodSpend = transactions.filter(t => t.category === 'Food').reduce((s, t) => s + t.amount, 0);
     if (foodSpend > budgetLimits.Food) tips.push('🍔 Your food spending is over budget. Try meal planning to reduce costs.');
-    
+
     const entertainment = transactions.filter(t => t.category === 'Entertainment').reduce((s, t) => s + t.amount, 0);
     if (entertainment > budgetLimits.Entertainment) tips.push('🎉 Entertainment spending is high. Look for free or low-cost alternatives.');
 
@@ -1036,12 +1087,12 @@
     const balance = income - expense;
     let text = `💰 *My Finance Summary*\n`;
     text += `_Generated by TeaJay Konsult Finance Tracker_\n\n`;
-    text += `✅ Total Income: ₦${income.toLocaleString()}\n`;
-    text += `❌ Total Expenses: ₦${expense.toLocaleString()}\n`;
-    text += `💵 Balance: ₦${balance.toLocaleString()}\n\n`;
+    text += `✅ Total Income: ${formatAmount(income)}\n`;
+    text += `❌ Total Expenses: ${formatAmount(expense)}\n`;
+    text += `💵 Balance: ${formatAmount(balance)}\n\n`;
     text += `📋 *Recent Transactions:*\n`;
     transactions.slice(0, 10).forEach(t => {
-      text += `${t.type === 'income' ? '➕' : '➖'} ${t.desc} - ₦${t.amount.toLocaleString()} (${t.date})\n`;
+      text += `${t.type === 'income' ? '➕' : '➖'} ${t.desc} - ${formatAmount(t.amount)} (${t.date})\n`;
     });
     text += `\n_Track your finances with My Finance Tracker by TeaJay Konsult_`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
@@ -1058,6 +1109,7 @@
     document.getElementById('financePopup').classList.remove('show');
   }
 
+  initCurrency();
   setType('income');
   saveAndRender();
 
