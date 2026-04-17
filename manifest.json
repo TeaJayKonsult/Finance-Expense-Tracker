@@ -1,23 +1,47 @@
-
 {
   "name": "My Finance Tracker",
-  "short_name": "Finance Tracker",
-  "description": "Personal finance tracker by TeaJay Konsult Ltd.",
-  "start_url": "./index.html",
+  "short_name": "FinanceTracker",
+  "description": "Track income, expenses, budgets, and get financial insights. By TeaJay Konsult.",
+  "start_url": ".",
   "display": "standalone",
-  "background_color": "#0d3d22",
   "theme_color": "#1a6b3c",
+  "background_color": "#f0f7f3",
   "orientation": "portrait",
+  "scope": "/",
   "icons": [
     {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231a6b3c'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white'%3E💰%3C/text%3E%3C/svg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231a6b3c'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white'%3E💰%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231a6b3c'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white'%3E💰%3C/text%3E%3C/svg%3E",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Transaction",
+      "short_name": "Add",
+      "description": "Quickly add a new transaction",
+      "url": ".",
+      "icons": [{ "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231a6b3c'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white'%3E➕%3C/text%3E%3C/svg%3E", "sizes": "any" }]
+    },
+    {
+      "name": "View Budgets",
+      "short_name": "Budgets",
+      "description": "Check your budget limits",
+      "url": ".",
+      "icons": [{ "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231a6b3c'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white'%3E🎯%3C/text%3E%3C/svg%3E", "sizes": "any" }]
     }
   ]
 }
